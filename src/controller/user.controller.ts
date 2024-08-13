@@ -14,9 +14,9 @@ const userController = {
 
     try {
       if (!email || !password)
-        return res.status(400).json({ msg: 'Please fill in all fields.' })
+        return res.status(400).json({ msg: 'Please fill in all fields.' });
       if (!validateEmail(email))
-        return res.status(400).json({ msg: 'Invalid Email.' })
+        return res.status(400).json({ msg: 'Invalid Email.' });
 
       User.findOne({ email: email }).then(user => {
         if (user) {
@@ -44,27 +44,30 @@ const userController = {
 
             sendEmail(email, url, "Verify your email address");
             res.json({ msg: "Email verification message has been sent." })
+          } else {
+            // User Model
+            const newUser = new User({
+              email: email,
+              password: password
+            })
+
+            bcrypt.genSalt(10, (err, salt) => {
+              bcrypt.hash(newUser.password, salt, (err, hash) => {
+                if (err) throw err;
+                newUser.password = hash;
+
+                // Save to the DB
+                newUser.save()
+                  .then(user => res.status(200).json({ msg: 'Successfuly registered', user }))
+                  .catch(err => {
+                    res.status(400).json({ msg: "Registration failed", err });
+                    console.warn(err);
+                  })
+              })
+            })
           }
 
-          const newUser = new User({
-            email: email,
-            password: password
-          })
 
-          bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(newUser.password, salt, (err, hash) => {
-              if (err) throw err;
-              newUser.password = hash;
-
-              // Save to the DB
-              newUser.save()
-                .then(user => res.status(200).json({ msg: 'Successfuly registered', user }))
-                .catch(err => {
-                  res.status(400).json({ msg: "Registration failed", err });
-                  console.warn(err);
-                })
-            })
-          })
         }
       })
 
@@ -101,31 +104,50 @@ const userController = {
 
   // Login 
   login: (req: Request, res: Response) => {
+
     const { email, password } = req.body;
 
-    User.findOne(email)
-      .then(user => {
-        if (!user) {
-          return res.json({ msg: "Email does not exist!" })
-        }
+    
+    try {
+      if (!email || !password)
+        return res.status(400).json({ msg: 'Please fill in all fields.' });
+  
+      if (!validateEmail(email))
+        return res.status(400).json({ msg: 'Invalid Email.' });
+  
+      // return res.send(email);
+      
+      User.findOne({email})
+        .then(user => {
+          if (!user) {
+            return res.json({ msg: "Email does not exist!" })
+          }
+          
 
-        bcrypt.compare(password, user.password)
-          .then(isMatch => {
-            if (!isMatch) {
-              return res.json({ msg: "Password incorrect!" })
-            }
-
-            const payload = { name: user.name, email: user.email }
-
-            jwt.sign(payload, LOGIN_TOKEN_SECRET, { expiresIn: 3600 }, (err, token) => {
-              res.status(200).json({
-                success: true,
-                msg: 'Successfully logged in!',
-                token: token
+          bcrypt.compare(password, user.password)
+            .then(isMatch => {
+              if (!isMatch) {
+                return res.json({ msg: "Password incorrect!" })
+              }
+  
+              const payload = { name: user.name, email: user.email }
+  
+              jwt.sign(payload, LOGIN_TOKEN_SECRET, { expiresIn: 3600 }, (err, token) => {
+                
+                if (err) return console.log(err);
+                
+                res.status(200).json({
+                  success: true,
+                  msg: 'Successfully logged in!',
+                  token: token
+                })
               })
             })
-          })
-      })
+        })
+    } catch (err) {
+      console.log(err);
+      
+    }
   }
 }
 
