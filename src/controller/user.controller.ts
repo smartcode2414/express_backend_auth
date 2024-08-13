@@ -151,8 +151,8 @@ const userController = {
   },
 
   userInfo: (req: Request, res: Response) => {
-
-    res.send('hello');
+    const data: any = req.body;
+    res.status(200).json({data});
   }
 }
 

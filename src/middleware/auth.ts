@@ -26,7 +26,7 @@ const auth = (req: Request, res: Response, next: any) => {
                         }
                     })
                     .catch(err => {
-                        // console.log(err);
+                        console.log(err);
                     })
             }
         })
