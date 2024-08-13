@@ -80,16 +80,16 @@ const userController = {
   verifyRegister: (req: Request, res: Response) => {
     const { activation_token } = req.body;
 
-    jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET, (err, decoded) => {
+    jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET, (err: any, decoded: any) => {
       if (err) {
         res.status(400).json({ msg: "Un verifyed Token" })
       } else {
         const { name, email, password } = decoded;
 
         const newUser = new User({
-          name,
-          email,
-          password,
+          name: name,
+          email: email,
+          password: password,
         })
         // Save to the DB
         newUser.save()
@@ -133,7 +133,7 @@ const userController = {
               const payload = { name: user.name, email: user.email }
   
               jwt.sign(payload, LOGIN_TOKEN_SECRET, { expiresIn: 3600 }, (err, token) => {
-                
+
                 if (err) return console.log(err);
                 
                 res.status(200).json({
@@ -148,6 +148,11 @@ const userController = {
       console.log(err);
       
     }
+  },
+
+  userInfo: (req: Request, res: Response) => {
+
+    res.send('hello');
   }
 }
 

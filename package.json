@@ -26,9 +26,11 @@
     "yarn": "^1.22.21"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.17",
     "@types/express-validator": "^3.0.0",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/mongoose": "^5.11.97",
     "@types/nodemailer": "^6.4.14",
     "dotenv": "^16.1.3",
